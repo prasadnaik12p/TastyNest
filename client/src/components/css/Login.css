@@ -1,0 +1,96 @@
+
+.login-grid {
+  display: grid;
+  min-height: 100svh;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .login-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.login-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .login-left {
+    padding: 2.5rem;
+  }
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .logo-wrapper {
+    justify-content: flex-start;
+  }
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-icon {
+  background-color: #3b82f6; /* Replace with your primary color */
+  color: white;
+  display: flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Form Section */
+.form-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 20rem;
+}
+
+/* Right Side */
+.login-right {
+  background-color: #f3f4f6; /* Replace with your muted color */
+  position: relative;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .login-right {
+    display: block;
+  }
+}
+
+.login-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* filter: brightness(0.2) grayscale(100%); */
+}
