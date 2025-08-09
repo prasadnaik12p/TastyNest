@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Add Recipe - TastyNest</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; max-width:800px; margin:40px auto; padding:0 16px; }
+    label { display:block; margin-top:12px; font-weight:600; }
+    input[type="text"], input[type="number"], textarea { width:100%; padding:8px; box-sizing:border-box; }
+    .ingredients { margin-top:8px; }
+    .ingredient-row { display:flex; gap:8px; margin-bottom:8px; }
+    .ingredient-row input { flex:1 }
+    button { margin-top:12px; padding:8px 12px; }
+  </style>
+</head>
+<body>
+  <h1>Add New Recipe</h1>
+
+  <!--
+    Note:
+    - enctype="multipart/form-data" required for file uploads (image).
+    - If you POST this form directly, your Express backend must use multer to parse it.
+  -->
+  <form id="recipeForm" enctype="multipart/form-data" method="POST" action="http://localhost:8080/recipes/new">
+    <label for="name">Recipe Name</label>
+    <input id="name" name="name" type="text" required />
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description" rows="4" required></textarea>
+
+    <label for="price">Price (INR)</label>
+    <input id="price" name="price" type="number" min="0" step="0.01" required />
+
+    <label>Ingredients</label>
+    <div id="ingredients" class="ingredients">
+      <div class="ingredient-row">
+        <input name="ingredients[0][name]" placeholder="Ingredient name" required />
+        <input name="ingredients[0][quantity]" placeholder="Quantity (e.g., 100g, 1 cup)" required />
+        <button type="button" class="remove-ingredient" onclick="removeIngredient(this)">−</button>
+      </div>
+    </div>
+    <button type="button" id="addIngredientBtn">+ Add ingredient</button>
+
+    <label for="image">Recipe Image</label>
+    <input id="image" name="image" type="file" accept="image/*" />
+
+    <div>
+      <button type="submit">Create Recipe</button>
+      <button type="button" id="ajaxSubmit">Create (AJAX)</button>
+    </div>
+  </form>
+
+  <script>
+    // Manage dynamic ingredients
+    let ingredientIndex = 1;
+    document.getElementById('addIngredientBtn').addEventListener('click', () => {
+      const container = document.getElementById('ingredients');
+      const row = document.createElement('div');
+      row.className = 'ingredient-row';
+      row.innerHTML = `
+        <input name="ingredients[${ingredientIndex}][name]" placeholder="Ingredient name" required />
+        <input name="ingredients[${ingredientIndex}][quantity]" placeholder="Quantity (e.g., 2 tsp)" required />
+        <button type="button" class="remove-ingredient" onclick="removeIngredient(this)">−</button>
+      `;
+      container.appendChild(row);
+      ingredientIndex++;
+    });
+
+    function removeIngredient(btn) {
+      const row = btn.closest('.ingredient-row');
+      if (!row) return;
+      row.remove();
+    }
+
+    // Optional: AJAX submit using fetch() and FormData (keeps file uploads)
+    document.getElementById('ajaxSubmit').addEventListener('click', async () => {
+      const form = document.getElementById('recipeForm');
+      const formData = new FormData(form);
+
+      // If your backend expects ingredients as array/object rather than form-data nested keys,
+      // you may want to convert ingredients to JSON string and send with key 'ingredientsJson'.
+      // Example conversion (optional):
+      // const ingredients = [];
+      // document.querySelectorAll('.ingredient-row').forEach((row) => {
+      //   const name = row.querySelector('input[name$="[name]"]').value;
+      //   const qty = row.querySelector('input[name$="[quantity]"]').value;
+      //   ingredients.push({ name, quantity: qty });
+      // });
+      // formData.set('ingredients', JSON.stringify(ingredients));
+
+      try {
+        const res = await fetch('/recipes', {
+          method: 'POST',
+          body: formData // multipart/form-data automatically set by browser
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message || 'Recipe added');
+          // If API returns newRecipe, you can redirect or update UI
+          console.log('Created:', data.newRecipe || data);
+          form.reset();
+          // reset ingredients UI to one row
+          document.getElementById('ingredients').innerHTML = `
+            <div class="ingredient-row">
+              <input name="ingredients[0][name]" placeholder="Ingredient name" required />
+              <input name="ingredients[0][quantity]" placeholder="Quantity (e.g., 100g)" required />
+              <button type="button" class="remove-ingredient" onclick="removeIngredient(this)">−</button>
+            </div>
+          `;
+          ingredientIndex = 1;
+        } else {
+          alert(data.message || 'Error adding recipe');
+          console.error(data);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network or server error');
+      }
+    });
+  </script>
+</body>
+</html>
